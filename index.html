@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    #users-table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#users-table td, #users-table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#users-table tr:nth-child(even){background-color: #f2f2f2;}
+
+#users-table tr:hover {background-color: #ddd;}
+
+#users-table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #04AA6D;
+  color: white;
+}
+
+.govind_footer {
+   position: fixed;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   background-color: #faebd7;
+   color: black;
+   text-align: center;
+      line-height: 2.5;
+}
+  </style>
+</head>
+
+<body>
+  <div class="container" ng-app="myApp">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="page-header">
+        <h1>{{ title }}</h1>
+       </div>
+    </div>
+    
+    <div ui-view></div>
+    
+  </div>
+  
+  <script type="text/ng-template" id="login.html">
+    <div class="col-md-12">
+      <h3>Login</h3>
+      
+      <form ng-submit="formSubmit()" class="form">
+        <div class="col-md-4">
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model="username" placeholder="username" required=""/>
+          </div> 
+
+          <div class="form-group">
+            <input type="password" class="form-control" ng-model="password" placeholder="password" required=""/>
+          </div>
+
+          <div class="form-group">
+            <button style="margin-top: -25%; margin-left: 107%;" type="submit" class="btn btn-success">Login</button>
+            <span class="text-danger">{{ error }}</span>
+          </div>
+
+        </div>
+    <div style="margin-bottom: 9%; padding-bottom: 13%;" class="page-header"></div>
+        </div>
+      </form>
+    </div>
+  </script>
+  
+  <script type="text/ng-template" id="home.html">
+    <div class="col-md-12">
+     
+    <h4>Welcome, Admin</h4>
+    <button style="margin-top: -5.5%; margin-left: 14%;" ui-sref="login" class="btn btn-success">Log Out</button>
+    
+    <h2>Company List : </h2>
+        
+        
+         <div class="flex" ng-repeat="x in company.Companies">
+           <div  class="flex">
+             <span style="font-size: 20px; font-weight: 600;">  {{x.id}}. {{x.name}} </span>
+           <img style="margin-bottom: 7px; width: 36px; " class="flex"src="{{x.logo}}"  width="30" height="30"></div>
+           <h4>Description : </h4>
+           <p>{{x.description}}</p>
+           <h3>Contacted by :</h3>
+         <table style="margin-bottom: 2%;" id="users-table">
+  <tr>
+    <th>Name</th>
+    <th>Country</th>
+    <th>Phone</th>
+  </tr>
+  <tr>
+    <td>{{users.User[0].firstName}} {{users.User[0].lastName}}</td>
+    <td>{{users.User[0].country}}</td>
+    <td>{{users.User[0].phone}}</td>
+  </tr>
+    <tr>
+    <td>{{users.User[3].firstName}} {{users.User[0].lastName}}</td>
+    <td>{{users.User[3].country}}</td>
+    <td>{{users.User[3].phone}}</td>
+  </tr>
+</table>
+           <div>
+             
+           </div>
+           
+         </div>
+        <h2> List of Users</h2>
+        <div >
+        <table style="margin-bottom: 2%;" id="users-table">
+  <tr >
+    <th>Name</th>
+    <th>Country</th>
+    <th>Phone</th>
+  </tr>
+  <tr  ng-repeat="y in users.User">
+    <td>{{y.firstName}} {{y.lastName}}</td>
+    <td>{{y.country}}</td>
+    <td>{{y.phone}}</td>
+  </tr>
+</table>
+    <div style="margin-bottom: 6%; padding-bottom: 0%;" class="page-header"></div>
+        </div>
+    
+      
+    </div>
+    
+  </script>
+</div>
+ <div class="govind_footer">
+  <p>Application Developed by <b>Govind Soni</b>  &nbsp; <i>(govindsoni1795@gmail.com)</i></p>
+</div> 
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.14/angular.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.18/angular-ui-router.js"></script>
+<script>
+  (function() {
+  var app = angular.module('myApp', ['ui.router']);
+  
+  app.run(function($rootScope, $location, $state, LoginService) {
+    $rootScope.$on('$stateChangeStart', 
+      function(event, toState, toParams, fromState, fromParams){ 
+          console.log('Changed state to: ' + toState);
+      });
+    
+      if(!LoginService.isAuthenticated()) {
+        $state.transitionTo('login');
+      }
+  });
+
+  
+  app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise('/home');
+    
+    $stateProvider
+      .state('login', {
+        url : '/login',
+        templateUrl : 'login.html',
+        controller : 'LoginController'
+      })
+      .state('home', {
+        url : '/home',
+        templateUrl : 'home.html',
+        controller : 'HomeController'
+      });
+  }]);
+
+  app.controller('LoginController', function($scope, $rootScope, $stateParams, $state, LoginService) {
+    $rootScope.title = "AXY Ltd.";
+     
+    $scope.formSubmit = function() {
+      if(LoginService.login($scope.username, $scope.password)) {
+        $scope.error = '';
+        $scope.username = '';
+        $scope.password = '';
+        $state.transitionTo('home');
+      } else {
+        $scope.error = "Incorrect username/password !";
+      }   
+    };
+    
+        $rootScope.users = {
+        User: 
+		[
+  {
+    "id": "1",
+    "firstName": "Animesh",
+    "lastName": "Roy",
+    "email": "ani@gmail.com",
+    "age": 21,
+    "companyId": "1",
+    "phone" : 858585,
+    "country" : "Japan"
+  },
+  {
+    "id": "2",
+    "firstName": "Rahul",
+    "lastName": "Sharma",
+    "email": "rahul@gmail.com",
+    "age": 20,
+    "companyId": "1",
+    "phone" : 7585858,
+    "country" : "Israel"
+  },
+  {
+    "id": "3",
+    "firstName": "Mark",
+    "lastName": "Tyson",
+    "email": "lipon21@gmail.com",
+    "age": 22,
+    "companyId": "1",
+    "phone" : 665558,
+    "country" : "Australia"
+  },
+  {
+    "id": "4",
+    "firstName": "Saurav",
+    "lastName": "Kumar",
+    "email": "saurav@gmail.com",
+    "age": 24,
+    "companyId": "1",
+    "phone" : 98558,
+    "country" : "India"
+  }
+]
+      };
+    
+    $rootScope.company = {
+        Companies: 
+		[
+  {
+    "id": "1",
+    "name": "Apple",
+    "logo": "https://cdn.mos.cms.futurecdn.net/MFHVMYQCeJHMGop4u8VkzJ-1200-80.jpg",
+    "description": "Apple Inc. is an American multinational technology company headquartered in Cupertino, California, that designs, develops, and sells consumer electronics, computer software, and online services. It is considered one of the Big Four technology companies, alongside Amazon, Google, and Microsoft."
+  },
+  {
+    "id": "2",
+    "name": "Microsoft",
+    "logo": "https://image.similarpng.com/very-thumbnail/2020/07/Microsoft-icon-logo-on-transparent-background-PNG.png",
+    "description": "Microsoft Corporation is an American multinational technology company with headquarters in Redmond, Washington. It develops, manufactures, licenses, supports, and sells computer software, consumer electronics, personal computers, and related services."
+  },
+  {
+    "id": "3",
+    "name": "Google",
+    "logo": "https://image.similarpng.com/very-thumbnail/2020/12/Illustration-of-Google-icon-on-transparent-background-PNG.png",
+    "description": "Google Inc., American search engine company, founded in 1998 by Sergey Brin and Larry Page, that is a subsidiary of the holding company Alphabet Inc. More than 70 percent of worldwide online search requests are handled by Google, placing it at the heart of most Internet users' experience."
+  }
+]
+      };
+    console.log($rootScope.company, "govind $rootScope.company")
+  });
+  
+  app.controller('HomeController', function($scope, $rootScope, $stateParams, $state, LoginService) {
+    $rootScope.title = "AXY Ltd.";
+    
+  });
+  //var users = https://my-json-server.typicode.com/bokadedarvin/AngularDeveloperSample/users
+  //console.log(users , "users")
+  
+  app.factory('LoginService', function() {
+    var admin = 'Encora';
+    var pass = 'Encora@123';
+    var isAuthenticated = false;
+    
+    return {
+      login : function(username, password) {
+        isAuthenticated = username === admin && password === pass;
+        return isAuthenticated;
+      },
+      isAuthenticated : function() {
+        return isAuthenticated;
+      }
+    };
+    
+  });
+  
+})();
+</script>
+
+</html>
+
+
